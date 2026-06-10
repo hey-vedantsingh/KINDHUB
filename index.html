@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIND — Intelligence Redefined</title>
+<style>
+  :root {
+    --black: #000000;
+    --blue: #051963;
+    --white: #fafafa;
+    --blue-100: #f5f5f5;
+    --blue-200: #e8e8e8;
+    --blue-300: #d0d0d0;
+    --blue-400: #888888;
+    --blue-500: #1f2d61;
+    --blue-600: #444444;
+    --blue-700: #052699;
+    --font-display: 'Times New Roman', Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --nav-height: 68px;
+    --max-w: 1280px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--white);
+    color: var(--blue);
+    line-height: 1.6;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-height);
+    background: rgba(250,250,250,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--blue-200);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+  }
+
+  nav.scrolled {
+    background: rgba(250,250,250,0.98);
+    border-bottom-color: var(--blue-300);
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+  }
+  .nav-logo img { height: 28px; width: auto; display: block; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .nav-links li { position: relative; }
+
+  .nav-btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--blue-600);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  .nav-btn:hover { color: var(--blue); background: var(--blue-100); }
+
+  .nav-btn-login {
+    color: var(--blue);
+    border: 1px solid var(--blue-300);
+    padding: 7px 20px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .nav-btn-login:hover { border-color: var(--blue); background: var(--blue); color: var(--white); }
+
+  .nav-caret {
+    width: 10px; height: 10px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 0.2s var(--ease);
+    display: inline-block;
+  }
+
+  .nav-dropdown-wrap:hover .nav-caret,
+  .nav-dropdown-wrap.open .nav-caret {
+    transform: rotate(225deg) translateY(-2px);
+  }
+
+  /* Dropdown */
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    background: var(--white);
+    border: 1px solid var(--blue-200);
+    border-radius: 8px;
+    padding: 8px;
+    min-width: 240px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease), visibility 0.2s;
+    z-index: 100;
+  }
+
+  .nav-dropdown-wrap:hover .dropdown,
+  .nav-dropdown-wrap.open .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+    color: var(--blue);
+  }
+
+  .dropdown-item:hover { background: var(--blue-100); }
+
+  .dropdown-icon {
+    width: 32px; height: 32px;
+    border: 1px solid var(--blue-200);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .dropdown-item:hover .dropdown-icon { border-color: var(--gray-400); background: var(--blue-100); }
+
+  .dropdown-text { display: flex; flex-direction: column; gap: 1px; }
+  .dropdown-label { font-size: 13px; font-weight: 500; letter-spacing: 0.02em; }
+  .dropdown-desc { font-size: 11px; color: var(--blue-400); }
+
+  /* Mobile nav */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 8px;
+    background: none;
+    border: none;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 22px; height: 1.5px;
+    background: var(--blue);
+    transition: transform 0.3s var(--ease), opacity 0.3s;
+  }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--nav-height);
+    left: 0; right: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--blue-200);
+    padding: 16px 24px 24px;
+    z-index: 999;
+  }
+
+  .mobile-menu.open { display: block; }
+
+  .mobile-nav-item {
+    display: block;
+    padding: 14px 0;
+    font-size: 15px;
+    color: var(--blue);
+    border-bottom: 1px solid var(--blue-200);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--blue-200);
+    width: 100%;
+    text-align: left;
+  }
+
+  /* ── CONTAINERS ── */
+  .container {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .container { padding: 0 20px; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 120px 0; }
+
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-400);
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  /* ── ABOUT PAGE ── */
+  .about-hero {
+    padding-top: calc(var(--nav-height) + 80px);
+    padding-bottom: 80px;
+    border-bottom: 1px solid var(--blue-200);
+  }
+
+  .about-hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+  }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 6vw, 88px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--blue);
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    color: var(--blue-400);
+  }
+
+  .hero-right {
+    padding-bottom: 8px;
+  }
+
+  .hero-descriptor {
+    font-size: 17px;
+    color: var(--blue-600);
+    line-height: 1.75;
+    max-width: 440px;
+    margin-bottom: 40px;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--blue-200);
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--blue-400);
+    letter-spacing: 0.06em;
+  }
+
+  /* Mission section */
+  .mission-grid {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .mission-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    position: sticky;
+    top: calc(var(--nav-height) + 32px);
+  }
+
+  .mission-body p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--blue-600);
+    margin-bottom: 24px;
+  }
+
+  .mission-body p:last-child { margin-bottom: 0; }
+
+  .pull-quote {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--blue);
+    border-left: 2px solid var(--blue);
+    padding-left: 28px;
+    margin: 40px 0;
+  }
+
+  /* Values section */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 60px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--blue-200);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.5vw, 36px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--blue-200);
+    border: 1px solid var(--blue-200);
+  }
+
+  .value-card {
+    background: var(--white);
+    padding: 40px 36px;
+    transition: background 0.2s;
+  }
+
+  .value-card:hover { background: var(--blue-100); }
+
+  .value-num {
+    font-size: 11px;
+    color: var(--blue-400);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .value-heading {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+  }
+
+  .value-text {
+    font-size: 14px;
+    color: var(--blue-600);
+    line-height: 1.75;
+  }
+
+  /* Marquee */
+  .marquee-section {
+    padding: 0;
+    border-top: 1px solid var(--blue-200);
+    border-bottom: 1px solid var(--blue-200);
+    overflow: hidden;
+    background: var(--blue);
+  }
+
+  .marquee-track {
+    display: flex;
+    gap: 0;
+    animation: marquee 30s linear infinite;
+    width: max-content;
+  }
+
+  .marquee-item {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--blue-400);
+    padding: 20px 48px;
+    border-right: 1px solid #1a1a1a;
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .marquee-item span { color: var(--white); }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Overview section */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 64px;
+    align-items: center;
+  }
+
+  .overview-text h3 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3vw, 44px);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .overview-text p {
+    font-size: 15px;
+    color: var(--blue-600);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .overview-visual {
+    aspect-ratio: 4/3;
+    background: var(--blue);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .grid-visual {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .visual-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-panel {
+    width: 90%;
+    height: 90%;
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--blue-100) 0%, var(--blue-200) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 48px;
+    color: rgba(5, 38, 153, 0.2);
+    letter-spacing: -0.02em;
+  }
+
+  .visual-ring {
+    display: none;
+  }
+
+  .visual-ring:nth-child(2) {
+    display: none;
+  }
+
+  .visual-ring:nth-child(3) {
+    display: none;
+  }
+
+  .visual-dot {
+    display: none;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.04); opacity: 0.7; }
+  }
+
+  /* CTA Banner */
+  .cta-banner {
+    padding: 80px 0;
+    background: var(--black);
+    text-align: center;
+  }
+
+  .cta-banner h2 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 60px);
+    font-weight: 400;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .cta-banner p {
+    color: var(--blue-400);
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: var(--white);
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s var(--ease);
+    text-decoration: none;
+  }
+
+  .btn-primary:hover { background: var(--blue-100); transform: translateY(-1px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    background: transparent;
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-decoration: none;
+    margin-left: 16px;
+  }
+
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+
+  /* ── TEAM PAGE ── */
+  .page-hero {
+    padding-top: calc(var(--nav-height) + 80px);
+    padding-bottom: 80px;
+    border-bottom: 1px solid var(--blue-200);
+  }
+
+  .page-hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+  }
+
+  .page-hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .page-hero-sub {
+    font-size: 16px;
+    color: var(--blue-600);
+    line-height: 1.75;
+    max-width: 400px;
+    align-self: end;
+  }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--blue-200);
+    border: 1px solid var(--blue-200);
+  }
+
+  .team-card {
+    background: var(--white);
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.2s var(--ease);
+  }
+
+  .team-card:hover { background: var(--blue-100); }
+
+  .team-photo {
+    aspect-ratio: 3/4;
+    background: var(--blue-100);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .team-photo-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 48px);
+    color: var(--blue-300);
+    background: var(--blue-100);
+    transition: background 0.2s;
+    letter-spacing: -0.02em;
+  }
+
+  .team-card:hover .team-photo-placeholder {
+    background: var(--blue-200);
+  }
+
+  .team-info {
+    padding: 24px 24px 28px;
+  }
+
+  .team-name {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .team-role {
+    font-size: 12px;
+    color: var(--blue-400);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .team-bio {
+    font-size: 13px;
+    color: var(--blue-600);
+    line-height: 1.65;
+  }
+
+  /* Advisors row */
+  .advisor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--blue-200);
+    border: 1px solid var(--blue-200);
+  }
+
+  .advisor-card {
+    background: var(--white);
+    padding: 32px 28px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+
+  .advisor-card:hover { background: var(--blue-100); }
+
+  .advisor-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+
+  .advisor-name {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+
+  .advisor-role {
+    font-size: 12px;
+    color: var(--blue-400);
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  .advisor-note {
+    font-size: 13px;
+    color: var(--blue-600);
+    line-height: 1.6;
+  }
+
+  /* ── OFFERINGS PAGES ── */
+  .offering-hero {
+    padding-top: calc(var(--nav-height) + 80px);
+    padding-bottom: 100px;
+    background: var(--blue);
+    color: var(--white);
+  }
+
+  .offering-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-400);
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .offering-headline {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: 32px;
+    max-width: 800px;
+  }
+
+  .offering-headline em { color: var(--blue-400); font-style: italic; }
+
+  .offering-intro {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    max-width: 600px;
+    margin-bottom: 56px;
+  }
+
+  .offering-meta {
+    display: flex;
+    gap: 48px;
+    padding-top: 48px;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .offering-meta-item { display: flex; flex-direction: column; gap: 6px; }
+  .offering-meta-label { font-size: 11px; color: var(--blue-400); letter-spacing: 0.1em; text-transform: uppercase; }
+  .offering-meta-val { font-size: 15px; color: var(--white); }
+
+  .services-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--blue-200);
+    border: 1px solid var(--blue-200);
+  }
+
+  .service-item {
+    background: var(--white);
+    padding: 40px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: background 0.2s;
+  }
+
+  .service-item:hover { background: var(--blue-100); }
+
+  .service-num {
+    font-size: 11px;
+    color: var(--blue-400);
+    letter-spacing: 0.1em;
+  }
+
+  .service-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .service-desc {
+    font-size: 14px;
+    color: var(--blue-600);
+    line-height: 1.75;
+    flex: 1;
+  }
+
+  .service-arrow {
+    width: 24px; height: 24px;
+    border: 1px solid var(--blue-300);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .service-item:hover .service-arrow { border-color: var(--blue); background: var(--blue); }
+
+  .service-arrow::after {
+    content: '';
+    border-right: 1.5px solid var(--blue);
+    border-top: 1.5px solid var(--blue);
+    width: 7px; height: 7px;
+    transform: rotate(45deg) translateX(-1px);
+    transition: border-color 0.2s;
+  }
+
+  .service-item:hover .service-arrow::after { border-color: var(--white); }
+
+  /* Case studies */
+  .case-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .case-card {
+    border: 1px solid var(--blue-200);
+    padding: 32px;
+    transition: border-color 0.2s, transform 0.2s var(--ease);
+  }
+
+  .case-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+
+  .case-industry {
+    font-size: 11px;
+    color: var(--blue-400);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .case-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .case-result {
+    font-size: 36px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+
+  .case-result-label {
+    font-size: 12px;
+    color: var(--blue-400);
+  }
+
+  /* Process */
+  .process-steps {
+    counter-reset: step;
+  }
+
+  .process-step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 40px;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--blue-200);
+    align-items: start;
+  }
+
+  .process-step:first-child { padding-top: 0; }
+
+  .process-step-num {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 400;
+    color: var(--blue-200);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .process-step-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  .process-step-desc {
+    font-size: 15px;
+    color: var(--blue-600);
+    line-height: 1.75;
+  }
+
+  /* ── LOGIN PAGE ── */
+  .login-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .login-left {
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-left-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .login-left-content { position: relative; z-index: 1; }
+
+  .login-brand {
+    font-family: var(--font-display);
+    font-size: 52px;
+    color: var(--white);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    margin-bottom: 32px;
+  }
+
+  .login-tagline {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.4;
+    font-style: italic;
+    max-width: 340px;
+  }
+
+  .login-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px;
+  }
+
+  .login-form-wrap {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .login-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .login-sub {
+    font-size: 14px;
+    color: var(--blue-400);
+    margin-bottom: 48px;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue-600);
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-family: var(--font-body);
+    background: var(--white);
+    border: 1px solid var(--blue-200);
+    color: var(--blue);
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-input:focus { border-color: var(--blue); }
+  .form-input::placeholder { color: var(--blue-300); }
+
+  .form-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .form-forgot {
+    font-size: 13px;
+    color: var(--blue-400);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .form-forgot:hover { color: var(--blue); }
+
+  .form-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--blue);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 24px;
+  }
+
+  .form-submit:hover { background: var(--blue-600); }
+
+  .form-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0;
+    font-size: 12px;
+    color: var(--blue-300);
+  }
+
+  .form-divider::before, .form-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--blue-200);
+  }
+
+  .form-oauth {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid var(--blue-200);
+    font-size: 13px;
+    color: var(--blue-600);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-family: var(--font-body);
+  }
+
+  .form-oauth:hover { border-color: var(--blue); color: var(--blue); }
+
+  .form-footer {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--blue-400);
+  }
+
+  .form-footer a { color: var(--blue); text-decoration: underline; cursor: pointer; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--blue-200);
+    padding: 64px 0 48px;
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 64px;
+    margin-bottom: 64px;
+  }
+
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+
+  .footer-desc {
+    font-size: 13px;
+    color: var(--blue-400);
+    line-height: 1.7;
+    max-width: 280px;
+  }
+
+  .footer-col-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue-600);
+    margin-bottom: 20px;
+  }
+
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .footer-link {
+    font-size: 13px;
+    color: var(--blue-400);
+    cursor: pointer;
+    transition: color 0.15s;
+    text-decoration: none;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 0;
+    font-family: var(--font-body);
+  }
+
+  .footer-link:hover { color: var(--blue); }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 32px;
+    border-top: 1px solid var(--blue-200);
+    font-size: 12px;
+    color: var(--blue-400);
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .fade-in-delay-1 { transition-delay: 0.1s; }
+  .fade-in-delay-2 { transition-delay: 0.2s; }
+  .fade-in-delay-3 { transition-delay: 0.3s; }
+  .fade-in-delay-4 { transition-delay: 0.4s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-inner { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .advisor-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    section { padding: 72px 0; }
+    .about-hero-inner, .page-hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .mission-grid { grid-template-columns: 1fr; gap: 40px; }
+    .mission-title { position: static; }
+    .values-grid { grid-template-columns: 1fr; }
+    .overview-grid { grid-template-columns: 1fr; }
+    .services-list { grid-template-columns: 1fr; }
+    .case-grid { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
+    .advisor-grid { grid-template-columns: 1fr; }
+    .login-page { grid-template-columns: 1fr; }
+    .login-left { display: none; }
+    .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    .section-header { flex-direction: column; gap: 8px; }
+    .process-step { grid-template-columns: 48px 1fr; gap: 20px; }
+    .process-step-num { font-size: 32px; }
+    .offering-meta { flex-wrap: wrap; gap: 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in { opacity: 1; transform: none; transition: none; }
+    .marquee-track { animation-play-state: paused; }
+    @keyframes pulse-ring { 0%, 100% { transform: scale(1); opacity: 1; } }
+  }
+
+  /* Utility */
+  .mt-0 { margin-top: 0; }
+  .mt-40 { margin-top: 40px; }
+  .mt-64 { margin-top: 64px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ NAVIGATION ═══════════════════ -->
+<nav id="main-nav">
+  <a class="nav-logo" onclick="showPage('about')" aria-label="KINDHub home">
+    <img src="KINDHub-LOGO.png" alt="KINDHub" style="height: 80px; width: auto;">
+  </a>
+
+  <ul class="nav-links" id="desktop-nav">
+    <li><button class="nav-btn" onclick="showPage('about')">About</button></li>
+    <li class="nav-dropdown-wrap" id="offerings-wrap">
+      <button class="nav-btn" onclick="toggleDropdown()">
+        Offerings <span class="nav-caret"></span>
+      </button>
+      <div class="dropdown" id="offerings-dropdown">
+        <div class="dropdown-item" onclick="showPage('offering-consulting')">
+          <div class="dropdown-icon">✦</div>
+          <div class="dropdown-text">
+            <span class="dropdown-label">KIND Summit</span>
+            <span class="dropdown-desc">A Flagship MUN</span>
+          </div>
+        </div>
+        <div class="dropdown-item" onclick="showPage('offering-product')">
+          <div class="dropdown-icon">◈</div>
+          <div class="dropdown-text">
+            <span class="dropdown-label">KIND MUN</span>
+            <span class="dropdown-desc">Samll Scale MUN Experience</span>
+          </div>
+        </div>
+        <div class="dropdown-item" onclick="showPage('offering-automation')">
+          <div class="dropdown-icon">⟳</div>
+          <div class="dropdown-text">
+            <span class="dropdown-label">KIND TANK</span>
+            <span class="dropdown-desc">A Flagship pitch event</span>
+          </div>
+        </div>
+        <div class="dropdown-item" onclick="showPage('offering-research')">
+          <div class="dropdown-icon">◎</div>
+          <div class="dropdown-text">
+            <span class="dropdown-label">KIND Experience</span>
+            <span class="dropdown-desc">New Experiences</span>
+          </div>
+        </div>
+        <div class="dropdown-item" onclick="showPage('offering-enterprise')">
+          <div class="dropdown-icon">▣</div>
+          <div class="dropdown-text">
+            <span class="dropdown-label">KIND Space</span>
+            <span class="dropdown-desc">A Space for your Growth</span>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li><button class="nav-btn" onclick="showPage('team')">Team</button></li>
+    <li><button class="nav-btn nav-btn-login" onclick="showPage('login')">Login</button></li>
+  </ul>
+
+  <button class="nav-hamburger" onclick="toggleMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-nav-item" onclick="showPage('about')">About</button>
+  <button class="mobile-nav-item" onclick="showPage('offering-consulting')">KIND Summit</button>
+  <button class="mobile-nav-item" onclick="showPage('offering-product')">KIND MUN</button>
+  <button class="mobile-nav-item" onclick="showPage('offering-automation')">KIND TANK</button>
+  <button class="mobile-nav-item" onclick="showPage('offering-research')">KIND Experience</button>
+  <button class="mobile-nav-item" onclick="showPage('offering-enterprise')">KIND Space</button>
+  <button class="mobile-nav-item" onclick="showPage('team')">Team</button>
+  <button class="mobile-nav-item" onclick="showPage('login')">Login</button>
+</div>
+
+
+<!-- ═══════════════════ ABOUT PAGE ═══════════════════ -->
+<div class="page active" id="page-about">
+
+  <section class="about-hero">
+    <div class="container">
+      <div class="about-hero-inner">
+        <div>
+          <span class="section-eyebrow fade-in">KINDHub India</span>
+          <h1 class="hero-headline fade-in fade-in-delay-1">
+            Empowering <em>the next generation of</em><br>Changemakers
+          </h1>
+        </div>
+        <div class="hero-right fade-in fade-in-delay-2">
+          <p class="hero-descriptor">
+            KIND Hub Pvt. Ltd. is a leadership and innovation startup focused on building an ecosystem for young talent through experiential learning, dialogue, and entrepreneurship. Our aim is to identify, nurture, and scale. the next generation of leaders and innovators, with a strong emphasis on impact, inclusivity, and long-term growth. We focus on making students future ready and equipped for international careers.
+          </p>
+          <div class="hero-stats">
+            <div>
+              <div class="stat-num">1000+</div>
+              <div class="stat-label">Delegates Participated</div>
+            </div>
+            <div>
+              <div class="stat-num">15+</div>
+              <div class="stat-label">Committees</div>
+            </div>
+            <div>
+              <div class="stat-num">3</div>
+              <div class="stat-label">Events Conducted</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-section">
+    <div class="marquee-track" id="marquee">
+      <span class="marquee-item"><span>KINDHub</span></span>
+      
+      <span class="marquee-item"><span>KIND Summit</span></span>
+      
+      <span class="marquee-item"><span>KIND Space</span></span>
+      
+      
+      
+      <span class="marquee-item"><span>KIND Experience</span></span>
+      
+      <span class="marquee-item"><span>KIND Tank</span></span>
+      
+      <span class="marquee-item"><span>KIND MUN</span></span>
+      
+    
+    </div>
+  </div>
+
+  <!-- Mission -->
+  <section>
+    <div class="container">
+      <div class="mission-grid">
+        <div>
+          <span class="section-eyebrow fade-in">Our mission</span>
+          <h2 class="mission-title fade-in fade-in-delay-1">
+            Intelligent<br>work, done<br>with purpose.
+          </h2>
+        </div>
+        <div class="mission-body">
+          <p class="fade-in">
+            We founded KIND on a conviction: that artificial intelligence, applied with care and expertise, doesn't diminish human potential — it amplifies it. Every engagement we undertake is guided by that belief.
+          </p>
+          <blockquote class="pull-quote fade-in fade-in-delay-1">
+            "The measure of intelligence is the ability to change."
+          </blockquote>
+          <p class="fade-in fade-in-delay-2">
+            Our multidisciplinary teams bring together computer scientists, strategists, designers, and domain specialists — all working toward a single goal: helping your organisation do more of what matters, with less friction.
+          </p>
+          <p class="fade-in fade-in-delay-3">
+            We operate at the intersection of research and practice. Our methods are grounded in evidence; our delivery is built for the real world. We do not deploy technology for its own sake — we deploy it in service of outcomes you can measure.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section style="padding-top:0">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">What we stand for</span>
+        <h2 class="section-title">Core values</h2>
+      </div>
+      <div class="values-grid">
+        <div class="value-card fade-in">
+          <span class="value-num">01</span>
+          <h3 class="value-heading">Intellectual honesty</h3>
+          <p class="value-text">We tell clients what we believe, not what they want to hear. Rigorous thinking and clear communication are non-negotiable at every engagement.</p>
+        </div>
+        <div class="value-card fade-in fade-in-delay-1">
+          <span class="value-num">02</span>
+          <h3 class="value-heading">Human-centred design</h3>
+          <p class="value-text">Technology exists to serve people. Every system we build is designed around the humans who use it — their context, capabilities, and constraints.</p>
+        </div>
+        <div class="value-card fade-in fade-in-delay-2">
+          <span class="value-num">03</span>
+          <h3 class="value-heading">Long-term thinking</h3>
+          <p class="value-text">Quick wins are seductive. We help clients build foundations that compound over time — architectures, capabilities, and organisations that get better as they scale.</p>
+        </div>
+        <div class="value-card fade-in fade-in-delay-3">
+          <span class="value-num">04</span>
+          <h3 class="value-heading">Responsible deployment</h3>
+          <p class="value-text">We take seriously the societal implications of the systems we build. Ethics, privacy, and fairness are not afterthoughts — they are design constraints.</p>
+        </div>
+        <div class="value-card fade-in fade-in-delay-4">
+          <span class="value-num">05</span>
+          <h3 class="value-heading">Craft over convenience</h3>
+          <p class="value-text">There are faster paths and there are better paths. We choose the better path. Attention to detail and genuine craftsmanship define everything we produce.</p>
+        </div>
+        <div class="value-card fade-in fade-in-delay-4">
+          <span class="value-num">06</span>
+          <h3 class="value-heading">Collaborative by nature</h3>
+          <p class="value-text">We work with our clients, not for them. Deep partnership — sharing knowledge, building internal capability, and leaving organisations stronger — is how we operate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview visual -->
+  <section style="background:var(--blue-100); padding:100px 0">
+    <div class="container">
+      <div class="overview-grid">
+        <div class="overview-text">
+          <span class="section-eyebrow fade-in">Founder's View</span>
+          <h3 class="fade-in fade-in-delay-1">Built for the complexity of real enterprise</h3>
+          <p class="fade-in fade-in-delay-2">
+To me, KIND Hub represents a commitment to building more thanjust successful students — it represents a commitment to buildingresponsible, conscious, and capable individuals. At a time wheninformation is everywhere but guidance is scarce, we strive toprovide direction, mentorship, and purpose to young minds.          </p>
+          <p class="fade-in fade-in-delay-3">
+We believe true growth lies in cultivating character, critical thinking, empathy,
+leadership, and the courage to question and create. Through our initiatives and flagship
+platforms like KIND Summit, we work to nurture students who are not only skilled, but
+also values-driven and socially aware.
+Our mission is to continue building spaces where potential is recognized, voices are
+respected, and future leaders are shaped with both competence and integrity.    
+          </p>
+<p class="fade-in fade-in-delay-3"></p>Devansh Jaiswal (CEO, KIND Hub, MA - Economics)</p>
+          <button class="btn-primary mt-40 fade-in fade-in-delay-4" style="background:var(--blue); color:var(--white)" onclick="showPage('team')">
+            Meet the team →
+          </button>
+        </div>
+        <div class="overview-visual fade-in fade-in-delay-2">
+          <div class="grid-visual"></div>
+          <div class="visual-center">
+            <div class="photo-panel">
+                <img src="DEVANSH.jpg" alt="Company image">
+              </div>       
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Ready to think differently?</h2>
+      <p>Speak with our team about how KIND can accelerate your transformation.</p>
+      <button class="btn-primary" onclick="showPage('offering-consulting')">Explore offerings</button>
+      <button class="btn-secondary">Get in touch</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-brand">KIND</div>
+          <p class="footer-desc">An AI innovation firm helping forward-thinking organisations transform with intelligence, precision, and purpose.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Offerings</div>
+          <ul class="footer-links">
+            <li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Company</div>
+          <ul class="footer-links">
+            <li><button class="footer-link" onclick="showPage('about')">About</button></li>
+            <li><button class="footer-link" onclick="showPage('team')">Team</button></li>
+            <li><button class="footer-link">Careers</button></li>
+            <li><button class="footer-link">Press</button></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal</div>
+          <ul class="footer-links">
+            <li><button class="footer-link">Privacy Policy</button></li>
+            <li><button class="footer-link">Terms of Service</button></li>
+            <li><button class="footer-link">Cookie Policy</button></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 KIND Intelligence Ltd. All rights reserved.</span>
+        <span>London · New York · Singapore</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ═══════════════════ TEAM PAGE ═══════════════════ -->
+<div class="page" id="page-team">
+  <section class="page-hero">
+    <div class="container">
+      <div class="page-hero-inner">
+        <div>
+          <span class="section-eyebrow fade-in">The people behind KIND</span>
+          <h1 class="page-hero-headline fade-in fade-in-delay-1">Our<br><em style="font-style:italic; color:var(--blue-400)">team</em></h1>
+        </div>
+        <p class="page-hero-sub fade-in fade-in-delay-2">
+          Researchers, engineers, strategists, and designers — united by a shared belief that intelligence, applied with care, changes everything.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Leadership</span>
+        <h2 class="section-title">Founding team</h2>
+      </div>
+      <div class="team-grid">
+        <div class="team-card fade-in">
+          <div class="team-photo">
+            <div class="team-photo-placeholder">EA</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Eleanor Ashworth</div>
+            <div class="team-role">Chief Executive Officer</div>
+            <p class="team-bio">Former Head of AI Research at DeepVentures. Eleanor brings 14 years of experience at the intersection of machine learning and enterprise strategy. She holds a DPhil from Oxford in Computational Cognitive Science.</p>
+          </div>
+        </div>
+        <div class="team-card fade-in fade-in-delay-1">
+          <div class="team-photo">
+            <div class="team-photo-placeholder">MO</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Marcus Osei</div>
+            <div class="team-role">Chief Technology Officer</div>
+            <p class="team-bio">Previously Staff Engineer at Google DeepMind. Marcus leads our engineering and product infrastructure — translating research into production systems that scale. MIT alumnus, systems architecture specialist.</p>
+          </div>
+        </div>
+        <div class="team-card fade-in fade-in-delay-2">
+          <div class="team-photo">
+            <div class="team-photo-placeholder">SR</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Sana Rahmani</div>
+            <div class="team-role">Chief Strategy Officer</div>
+            <p class="team-bio">Ten years in McKinsey's Digital Practice before co-founding KIND. Sana shapes how we think about client engagements — from initial framing to long-term transformation roadmaps. MBA from INSEAD.</p>
+          </div>
+        </div>
+        <div class="team-card fade-in fade-in-delay-3">
+          <div class="team-photo">
+            <div class="team-photo-placeholder">JL</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">James Liu</div>
+            <div class="team-role">Chief Research Officer</div>
+            <p class="team-bio">Published researcher with 40+ papers in NeurIPS, ICML, and ICLR. James leads KIND's internal research agenda — ensuring our methods stay at the frontier of what's possible in applied AI.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Specialists</span>
+        <h2 class="section-title">Senior practitioners</h2>
+      </div>
+      <div class="team-grid">
+        <div class="team-card fade-in">
+          <div class="team-photo">
+            <div class="team-photo-placeholder" style="background:var(--blue-200)">NP</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Nadia Petrov</div>
+            <div class="team-role">Principal Engineer</div>
+            <p class="team-bio">MLOps and large-scale inference infrastructure. Nadia builds the systems that bring our models to production — reliably, efficiently, and at scale.</p>
+          </div>
+        </div>
+        <div class="team-card fade-in fade-in-delay-1">
+          <div class="team-photo">
+            <div class="team-photo-placeholder" style="background:var(--blue-200)">DK</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">David Kim</div>
+            <div class="team-role">Head of Design</div>
+            <p class="team-bio">Previously at Figma and Notion. David leads the human experience across everything KIND builds — ensuring intelligence is always accessible and intuitive.</p>
+          </div>
+        </div>
+        <div class="team-card fade-in fade-in-delay-2">
+          <div class="team-photo">
+            <div class="team-photo-placeholder" style="background:var(--blue-200)">AM</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Amara Mensah</div>
+            <div class="team-role">Lead AI Ethicist</div>
+            <p class="team-bio">Former Oxford Internet Institute fellow. Amara ensures every system KIND builds is fair, transparent, and aligned with the values of the organisations it serves.</p>
+          </div>
+        </div>
+        <div class="team-card fade-in fade-in-delay-3">
+          <div class="team-photo">
+            <div class="team-photo-placeholder" style="background:var(--blue-200)">RT</div>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Rafael Torres</div>
+            <div class="team-role">VP of Client Success</div>
+            <p class="team-bio">A decade of enterprise transformation experience across FS and healthcare. Rafael leads client relationships and ensures outcomes land as promised.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0; background:var(--blue-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Advisory</span>
+        <h2 class="section-title">Board & advisors</h2>
+      </div>
+      <div class="advisor-grid">
+        <div class="advisor-card fade-in">
+          <div class="advisor-avatar">LB</div>
+          <div>
+            <div class="advisor-name">Dr. Leila Benzara</div>
+            <div class="advisor-role">Advisory Board · AI Safety</div>
+            <p class="advisor-note">Senior Researcher at MIRI. Former Safety Lead at Anthropic. Guides KIND's responsible deployment framework.</p>
+          </div>
+        </div>
+        <div class="advisor-card fade-in fade-in-delay-1">
+          <div class="advisor-avatar">TN</div>
+          <div>
+            <div class="advisor-name">Thomas Nakamura</div>
+            <div class="advisor-role">Advisory Board · Enterprise</div>
+            <p class="advisor-note">Former CTO of Siemens Digital Industries. Brings 20+ years of large-scale industrial transformation experience.</p>
+          </div>
+        </div>
+        <div class="advisor-card fade-in fade-in-delay-2">
+          <div class="advisor-avatar">CW</div>
+          <div>
+            <div class="advisor-name">Claudia Watkins</div>
+            <div class="advisor-role">Advisory Board · Venture</div>
+            <p class="advisor-note">Partner at Sequoia Capital. Brings deep VC network and scaling expertise to KIND's growth strategy and portfolio positioning.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Interested in joining?</h2>
+      <p>We're hiring exceptional people across research, engineering, and strategy.</p>
+      <button class="btn-primary">View open roles</button>
+      <button class="btn-secondary">Get in touch</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-brand">KIND</div>
+          <p class="footer-desc">An AI innovation firm helping forward-thinking organisations transform with intelligence, precision, and purpose.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Offerings</div>
+          <ul class="footer-links">
+            <li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li>
+            <li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Company</div>
+          <ul class="footer-links">
+            <li><button class="footer-link" onclick="showPage('about')">About</button></li>
+            <li><button class="footer-link" onclick="showPage('team')">Team</button></li>
+            <li><button class="footer-link">Careers</button></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal</div>
+          <ul class="footer-links">
+            <li><button class="footer-link">Privacy Policy</button></li>
+            <li><button class="footer-link">Terms of Service</button></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 KIND Intelligence Ltd. All rights reserved.</span>
+        <span>London · New York · Singapore</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ═══════════════════ OFFERING: AI CONSULTING ═══════════════════ -->
+<div class="page" id="page-offering-consulting">
+  <div class="offering-hero">
+    <div class="container">
+      <span class="offering-eyebrow">Offerings / AI Consulting</span>
+      <h1 class="offering-headline">Strategic AI,<br><em>without the noise.</em></h1>
+      <p class="offering-intro">We help organisations develop coherent AI strategies — grounded in business reality, not vendor hype. From roadmapping to board-level advisory, we provide the thinking your transformation needs.</p>
+      <div class="offering-meta">
+        <div class="offering-meta-item">
+          <span class="offering-meta-label">Engagement type</span>
+          <span class="offering-meta-val">Advisory · Sprint · Retainer</span>
+        </div>
+        <div class="offering-meta-item">
+          <span class="offering-meta-label">Duration</span>
+          <span class="offering-meta-val">4 weeks – ongoing</span>
+        </div>
+        <div class="offering-meta-item">
+          <span class="offering-meta-label">Team size</span>
+          <span class="offering-meta-val">2 – 8 consultants</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">What we do</span>
+        <h2 class="section-title">Service areas</h2>
+      </div>
+      <div class="services-list">
+        <div class="service-item fade-in">
+          <span class="service-num">01</span>
+          <h3 class="service-name">AI Readiness Assessment</h3>
+          <p class="service-desc">A comprehensive audit of your data, infrastructure, talent, and culture to determine where AI can deliver the most value — and where it cannot. We produce a frank, actionable report with a prioritised investment roadmap.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-1">
+          <span class="service-num">02</span>
+          <h3 class="service-name">Strategy & Roadmapping</h3>
+          <p class="service-desc">Multi-year AI transformation strategies aligned to your business objectives. We work with your leadership team to define a coherent portfolio of AI initiatives — sequenced for maximum impact and minimum risk.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-2">
+          <span class="service-num">03</span>
+          <h3 class="service-name">Vendor & Build Assessment</h3>
+          <p class="service-desc">Rigorous, vendor-neutral evaluation of the build vs buy decision across your AI stack. We assess capabilities, costs, lock-in risks, and strategic fit — so you make informed choices rather than expensive mistakes.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-3">
+          <span class="service-num">04</span>
+          <h3 class="service-name">Governance & Risk Frameworks</h3>
+          <p class="service-desc">Comprehensive AI governance structures — covering ethics policies, risk registers, audit protocols, and regulatory compliance. Built to withstand scrutiny and scale as your AI footprint grows.</p>
+          <div class="service-arrow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0; background:var(--blue-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Results</span>
+        <h2 class="section-title">Client outcomes</h2>
+      </div>
+      <div class="case-grid">
+        <div class="case-card fade-in">
+          <div class="case-industry">Financial Services</div>
+          <div class="case-title">Global bank AI strategy & operating model</div>
+          <div class="case-result">£180M</div>
+          <div class="case-result-label">Identified efficiency value over 3 years</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-1">
+          <div class="case-industry">Healthcare</div>
+          <div class="case-title">NHS Trust diagnostic AI roadmap</div>
+          <div class="case-result">34%</div>
+          <div class="case-result-label">Reduction in diagnostic processing time</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-2">
+          <div class="case-industry">Retail</div>
+          <div class="case-title">FTSE 100 retailer AI transformation</div>
+          <div class="case-result">2.4×</div>
+          <div class="case-result-label">Increase in AI initiative ROI</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Let's think together.</h2>
+      <p>Book a 45-minute strategy conversation with our advisory team.</p>
+      <button class="btn-primary">Request a conversation</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div><div class="footer-brand">KIND</div><p class="footer-desc">Intelligence for the forward-thinking.</p></div>
+        <div><div class="footer-col-title">Offerings</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li><li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li><li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li><li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li><li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li></ul></div>
+        <div><div class="footer-col-title">Company</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('about')">About</button></li><li><button class="footer-link" onclick="showPage('team')">Team</button></li></ul></div>
+        <div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><button class="footer-link">Privacy</button></li><li><button class="footer-link">Terms</button></li></ul></div>
+      </div>
+      <div class="footer-bottom"><span>© 2025 KIND Intelligence Ltd.</span><span>London · New York · Singapore</span></div>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ═══════════════════ OFFERING: PRODUCT DEVELOPMENT ═══════════════════ -->
+<div class="page" id="page-offering-product">
+  <div class="offering-hero">
+    <div class="container">
+      <span class="offering-eyebrow">Offerings / Product Development</span>
+      <h1 class="offering-headline">Products that<br><em>think with you.</em></h1>
+      <p class="offering-intro">We design and engineer AI-native products from concept to launch — combining deep research capability with precision engineering and human-centred design.</p>
+      <div class="offering-meta">
+        <div class="offering-meta-item"><span class="offering-meta-label">Engagement type</span><span class="offering-meta-val">Discovery · Build · Embed</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">Duration</span><span class="offering-meta-val">3 months – 18 months</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">Typical team</span><span class="offering-meta-val">6 – 20 specialists</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Our process</span>
+        <h2 class="section-title">How we build</h2>
+      </div>
+      <div class="process-steps">
+        <div class="process-step fade-in">
+          <div class="process-step-num">01</div>
+          <div>
+            <h3 class="process-step-title">Discovery & definition</h3>
+            <p class="process-step-desc">We begin with deep user and stakeholder research — mapping the problem space, the opportunity, and the constraints. Output: a product brief and technical feasibility assessment that everyone aligns on before we write a line of code.</p>
+          </div>
+        </div>
+        <div class="process-step fade-in fade-in-delay-1">
+          <div class="process-step-num">02</div>
+          <div>
+            <h3 class="process-step-title">Design & prototype</h3>
+            <p class="process-step-desc">Interaction design and rapid prototyping — testing core assumptions with users before committing to full development. We use this phase to reduce risk and sharpen the product vision.</p>
+          </div>
+        </div>
+        <div class="process-step fade-in fade-in-delay-2">
+          <div class="process-step-num">03</div>
+          <div>
+            <h3 class="process-step-title">Engineering & training</h3>
+            <p class="process-step-desc">Full-stack engineering of the product, including any custom model training, fine-tuning, or RAG pipelines required. We build for production from day one — security, observability, and scalability are not afterthoughts.</p>
+          </div>
+        </div>
+        <div class="process-step fade-in fade-in-delay-3">
+          <div class="process-step-num">04</div>
+          <div>
+            <h3 class="process-step-title">Launch & embed</h3>
+            <p class="process-step-desc">Deployment, user onboarding, and knowledge transfer to your internal team. We don't disappear at launch — we stay through the critical first 90 days, iterating based on real usage data.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0; background:var(--blue-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Results</span>
+        <h2 class="section-title">Products we've shipped</h2>
+      </div>
+      <div class="case-grid">
+        <div class="case-card fade-in">
+          <div class="case-industry">Legal Technology</div>
+          <div class="case-title">AI-native contract intelligence platform</div>
+          <div class="case-result">78%</div>
+          <div class="case-result-label">Reduction in contract review time</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-1">
+          <div class="case-industry">Insurance</div>
+          <div class="case-title">Underwriting assistance AI co-pilot</div>
+          <div class="case-result">3.1×</div>
+          <div class="case-result-label">Increase in underwriter throughput</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-2">
+          <div class="case-industry">EdTech</div>
+          <div class="case-title">Adaptive learning personalisation engine</div>
+          <div class="case-result">41%</div>
+          <div class="case-result-label">Improvement in learning outcomes</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Have a product in mind?</h2>
+      <p>Tell us what you're building — we'll tell you how we can help.</p>
+      <button class="btn-primary">Start a discovery</button>
+    </div>
+  </div>
+
+  <footer><div class="container"><div class="footer-inner"><div><div class="footer-brand">KIND</div><p class="footer-desc">Intelligence for the forward-thinking.</p></div><div><div class="footer-col-title">Offerings</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li><li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li><li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li><li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li><li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li></ul></div><div><div class="footer-col-title">Company</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('about')">About</button></li><li><button class="footer-link" onclick="showPage('team')">Team</button></li></ul></div><div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><button class="footer-link">Privacy</button></li><li><button class="footer-link">Terms</button></li></ul></div></div><div class="footer-bottom"><span>© 2025 KIND Intelligence Ltd.</span><span>London · New York · Singapore</span></div></div></footer>
+</div>
+
+
+<!-- ═══════════════════ OFFERING: AUTOMATION ═══════════════════ -->
+<div class="page" id="page-offering-automation">
+  <div class="offering-hero">
+    <div class="container">
+      <span class="offering-eyebrow">Offerings / Automation Solutions</span>
+      <h1 class="offering-headline">Intelligent<br><em>processes, at scale.</em></h1>
+      <p class="offering-intro">We design and deploy intelligent automation — from document processing and workflow orchestration to agentic systems that act on your behalf. Built to be auditable, explainable, and reliable.</p>
+      <div class="offering-meta">
+        <div class="offering-meta-item"><span class="offering-meta-label">Engagement type</span><span class="offering-meta-val">Assessment · Pilot · Scale</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">Duration</span><span class="offering-meta-val">6 weeks – 12 months</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">ROI timeline</span><span class="offering-meta-val">Typically 4–9 months</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">What we automate</span>
+        <h2 class="section-title">Core capabilities</h2>
+      </div>
+      <div class="services-list">
+        <div class="service-item fade-in">
+          <span class="service-num">01</span>
+          <h3 class="service-name">Document Intelligence</h3>
+          <p class="service-desc">Extraction, classification, and processing of unstructured documents at scale — contracts, invoices, reports, forms. Accuracy rates that exceed human review, at a fraction of the cost and time.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-1">
+          <span class="service-num">02</span>
+          <h3 class="service-name">Workflow Orchestration</h3>
+          <p class="service-desc">End-to-end automation of multi-step business processes — connecting systems, routing decisions, and escalating exceptions intelligently. We replace fragile RPA with genuinely intelligent orchestration.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-2">
+          <span class="service-num">03</span>
+          <h3 class="service-name">Agentic Systems</h3>
+          <p class="service-desc">Autonomous AI agents that plan, act, and adapt — capable of executing complex multi-step tasks across your tooling and data landscape. Built with safety, observability, and human oversight by design.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-3">
+          <span class="service-num">04</span>
+          <h3 class="service-name">Monitoring & Continuous Learning</h3>
+          <p class="service-desc">Production-grade observability for automated systems — drift detection, performance monitoring, and feedback loops that allow your automation to improve over time without manual retraining cycles.</p>
+          <div class="service-arrow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0; background:var(--blue-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Results</span>
+        <h2 class="section-title">Automation outcomes</h2>
+      </div>
+      <div class="case-grid">
+        <div class="case-card fade-in">
+          <div class="case-industry">Banking</div>
+          <div class="case-title">KYC and compliance document processing</div>
+          <div class="case-result">92%</div>
+          <div class="case-result-label">Reduction in manual processing cost</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-1">
+          <div class="case-industry">Logistics</div>
+          <div class="case-title">Supply chain exception management agent</div>
+          <div class="case-result">6hrs</div>
+          <div class="case-result-label">Average resolution time (from 3 days)</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-2">
+          <div class="case-industry">Professional Services</div>
+          <div class="case-title">Automated client reporting pipeline</div>
+          <div class="case-result">£2.1M</div>
+          <div class="case-result-label">Annual labour cost saved</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Find out what you can automate.</h2>
+      <p>A 2-week process audit that maps your highest-value automation opportunities.</p>
+      <button class="btn-primary">Book a process audit</button>
+    </div>
+  </div>
+
+  <footer><div class="container"><div class="footer-inner"><div><div class="footer-brand">KIND</div><p class="footer-desc">Intelligence for the forward-thinking.</p></div><div><div class="footer-col-title">Offerings</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li><li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li><li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li><li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li><li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li></ul></div><div><div class="footer-col-title">Company</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('about')">About</button></li><li><button class="footer-link" onclick="showPage('team')">Team</button></li></ul></div><div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><button class="footer-link">Privacy</button></li><li><button class="footer-link">Terms</button></li></ul></div></div><div class="footer-bottom"><span>© 2025 KIND Intelligence Ltd.</span><span>London · New York · Singapore</span></div></div></footer>
+</div>
+
+
+<!-- ═══════════════════ OFFERING: RESEARCH ═══════════════════ -->
+<div class="page" id="page-offering-research">
+  <div class="offering-hero">
+    <div class="container">
+      <span class="offering-eyebrow">Offerings / Research & Innovation</span>
+      <h1 class="offering-headline">Frontier thinking,<br><em>applied.</em></h1>
+      <p class="offering-intro">Our research practice bridges the gap between academic AI and real-world deployment — translating frontier developments into competitive advantage for forward-thinking organisations.</p>
+      <div class="offering-meta">
+        <div class="offering-meta-item"><span class="offering-meta-label">Engagement type</span><span class="offering-meta-val">Sponsored Research · R&D Sprint · Lab</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">Duration</span><span class="offering-meta-val">3 months – 3 years</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">IP model</span><span class="offering-meta-val">Client-owned or co-developed</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Research areas</span>
+        <h2 class="section-title">Where we work</h2>
+      </div>
+      <div class="services-list">
+        <div class="service-item fade-in">
+          <span class="service-num">01</span>
+          <h3 class="service-name">Foundation Model Adaptation</h3>
+          <p class="service-desc">Fine-tuning, RLHF, and domain adaptation of foundation models for specialised applications. We make general AI genuinely useful in your specific context — financial, legal, scientific, industrial.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-1">
+          <span class="service-num">02</span>
+          <h3 class="service-name">Multimodal Systems</h3>
+          <p class="service-desc">Research and engineering of systems that reason across text, images, video, and structured data simultaneously. We are working at the frontier of what's currently possible in cross-modal intelligence.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-2">
+          <span class="service-num">03</span>
+          <h3 class="service-name">Reasoning & Planning</h3>
+          <p class="service-desc">Applied research into systems that plan, reason, and act over long horizons — multi-step problem solving, causal reasoning, and strategic planning that goes beyond next-token prediction.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-3">
+          <span class="service-num">04</span>
+          <h3 class="service-name">Evaluation & Measurement</h3>
+          <p class="service-desc">Rigorous evaluation methodology for AI systems in production — benchmarks, red-teaming, robustness testing, and longitudinal performance monitoring. You can only improve what you can measure.</p>
+          <div class="service-arrow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0; background:var(--blue-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Publications</span>
+        <h2 class="section-title">Selected research</h2>
+      </div>
+      <div class="case-grid">
+        <div class="case-card fade-in">
+          <div class="case-industry">NeurIPS 2024</div>
+          <div class="case-title">Efficient domain adaptation of LLMs under distribution shift</div>
+          <div class="case-result">3,200+</div>
+          <div class="case-result-label">Citations in 6 months</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-1">
+          <div class="case-industry">ICML 2024</div>
+          <div class="case-title">Scalable evaluation frameworks for enterprise AI</div>
+          <div class="case-result">Top 5%</div>
+          <div class="case-result-label">Cited papers at conference</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-2">
+          <div class="case-industry">ICLR 2025</div>
+          <div class="case-title">Agentic systems with verifiable safety constraints</div>
+          <div class="case-result">Oral</div>
+          <div class="case-result-label">Presentation — top 1.8% of submissions</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Commission frontier research.</h2>
+      <p>Partner with our research team to explore what's possible at the edge of the field.</p>
+      <button class="btn-primary">Talk to our researchers</button>
+    </div>
+  </div>
+
+  <footer><div class="container"><div class="footer-inner"><div><div class="footer-brand">KIND</div><p class="footer-desc">Intelligence for the forward-thinking.</p></div><div><div class="footer-col-title">Offerings</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li><li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li><li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li><li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li><li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li></ul></div><div><div class="footer-col-title">Company</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('about')">About</button></li><li><button class="footer-link" onclick="showPage('team')">Team</button></li></ul></div><div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><button class="footer-link">Privacy</button></li><li><button class="footer-link">Terms</button></li></ul></div></div><div class="footer-bottom"><span>© 2025 KIND Intelligence Ltd.</span><span>London · New York · Singapore</span></div></div></footer>
+</div>
+
+
+<!-- ═══════════════════ OFFERING: ENTERPRISE ═══════════════════ -->
+<div class="page" id="page-offering-enterprise">
+  <div class="offering-hero">
+    <div class="container">
+      <span class="offering-eyebrow">Offerings / Enterprise Services</span>
+      <h1 class="offering-headline">Transformation<br><em>at enterprise scale.</em></h1>
+      <p class="offering-intro">For large organisations navigating complex, multi-year AI transformations — we provide the strategic leadership, implementation capability, and organisational change management to make it stick.</p>
+      <div class="offering-meta">
+        <div class="offering-meta-item"><span class="offering-meta-label">Engagement type</span><span class="offering-meta-val">Programme · Embedded · Partnership</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">Duration</span><span class="offering-meta-val">12 months – multi-year</span></div>
+        <div class="offering-meta-item"><span class="offering-meta-label">Minimum scale</span><span class="offering-meta-val">1,000+ employees</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Service model</span>
+        <h2 class="section-title">What enterprise includes</h2>
+      </div>
+      <div class="services-list">
+        <div class="service-item fade-in">
+          <span class="service-num">01</span>
+          <h3 class="service-name">AI Centre of Excellence</h3>
+          <p class="service-desc">Design and build of an internal AI CoE — governance structures, talent frameworks, tooling, and ways of working that allow your organisation to own its AI capability for the long term, not depend on external partners indefinitely.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-1">
+          <span class="service-num">02</span>
+          <h3 class="service-name">Transformation Programme Management</h3>
+          <p class="service-desc">End-to-end programme leadership for large-scale AI transformation initiatives — managing timelines, stakeholders, budgets, and dependencies across complex enterprise environments. Senior programme directors embedded in your organisation.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-2">
+          <span class="service-num">03</span>
+          <h3 class="service-name">Capability Building & Training</h3>
+          <p class="service-desc">Structured learning programmes for technical and non-technical staff — from executive AI literacy to hands-on engineering bootcamps. We transfer knowledge so your people can lead the next wave of transformation themselves.</p>
+          <div class="service-arrow"></div>
+        </div>
+        <div class="service-item fade-in fade-in-delay-3">
+          <span class="service-num">04</span>
+          <h3 class="service-name">Data & Infrastructure Strategy</h3>
+          <p class="service-desc">Enterprise data architecture, governance, and platform strategy — the foundations without which AI programmes consistently fail. We help you build the data estate your future AI ambitions require.</p>
+          <div class="service-arrow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0; background:var(--blue-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow" style="margin-bottom:0">Enterprise results</span>
+        <h2 class="section-title">At scale</h2>
+      </div>
+      <div class="case-grid">
+        <div class="case-card fade-in">
+          <div class="case-industry">Telecommunications</div>
+          <div class="case-title">FTSE 50 telecom AI centre of excellence build</div>
+          <div class="case-result">18mo</div>
+          <div class="case-result-label">From zero to full internal capability</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-1">
+          <div class="case-industry">Public Sector</div>
+          <div class="case-title">UK government department transformation</div>
+          <div class="case-result">£340M</div>
+          <div class="case-result-label">Efficiency savings over programme lifetime</div>
+        </div>
+        <div class="case-card fade-in fade-in-delay-2">
+          <div class="case-industry">Manufacturing</div>
+          <div class="case-title">Global manufacturer AI-first operating model</div>
+          <div class="case-result">14</div>
+          <div class="case-result-label">Countries transformed in 24 months</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Ready for the long game?</h2>
+      <p>Speak with our enterprise team about a transformation partnership.</p>
+      <button class="btn-primary">Contact enterprise</button>
+    </div>
+  </div>
+
+  <footer><div class="container"><div class="footer-inner"><div><div class="footer-brand">KIND</div><p class="footer-desc">Intelligence for the forward-thinking.</p></div><div><div class="footer-col-title">Offerings</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('offering-consulting')">AI Consulting</button></li><li><button class="footer-link" onclick="showPage('offering-product')">Product Development</button></li><li><button class="footer-link" onclick="showPage('offering-automation')">Automation Solutions</button></li><li><button class="footer-link" onclick="showPage('offering-research')">Research & Innovation</button></li><li><button class="footer-link" onclick="showPage('offering-enterprise')">Enterprise Services</button></li></ul></div><div><div class="footer-col-title">Company</div><ul class="footer-links"><li><button class="footer-link" onclick="showPage('about')">About</button></li><li><button class="footer-link" onclick="showPage('team')">Team</button></li></ul></div><div><div class="footer-col-title">Legal</div><ul class="footer-links"><li><button class="footer-link">Privacy</button></li><li><button class="footer-link">Terms</button></li></ul></div></div><div class="footer-bottom"><span>© 2025 KIND Intelligence Ltd.</span><span>London · New York · Singapore</span></div></div></footer>
+</div>
+
+
+<!-- ═══════════════════ LOGIN PAGE ═══════════════════ -->
+<div class="page" id="page-login">
+  <div class="login-page">
+    <div class="login-left">
+      <div class="login-left-bg"></div>
+      <div class="login-left-content">
+        <div class="login-brand">KIND</div>
+        <p class="login-tagline">"Intelligence is the capacity to perceive the inessential."<br><br>— Iris Murdoch</p>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="login-form-wrap">
+        <button onclick="showPage('about')" style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--blue-400); background:none; border:none; cursor:pointer; padding:0; margin-bottom:48px; letter-spacing:0.06em; font-family:var(--font-body)">
+          ← Back to site
+        </button>
+        <h1 class="login-title">Welcome back.</h1>
+        <p class="login-sub">Sign in to your KIND workspace.</p>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" class="form-input" placeholder="you@company.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-row">
+          <div></div>
+          <a class="form-forgot">Forgot password?</a>
+        </div>
+        <button class="form-submit">Sign in</button>
+        <div class="form-divider">or</div>
+        <button class="form-oauth">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            <path d="M15.5 8.5h-7M12 8.5V16"/>
+          </svg>
+          Continue with Google
+        </button>
+        <button class="form-oauth">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M9 9h6M9 12h4"/>
+          </svg>
+          Continue with Microsoft
+        </button>
+        <p class="form-footer">
+          Don't have an account? <a onclick="void(0)">Request access</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ JAVASCRIPT ═══════════════════ -->
+<script>
+  // Page routing
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + pageId);
+    if (target) {
+      target.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      closeMobile();
+      setTimeout(() => initFadeIns(), 100);
+    }
+  }
+
+  // Dropdown
+  function toggleDropdown() {
+    const wrap = document.getElementById('offerings-wrap');
+    wrap.classList.toggle('open');
+    document.addEventListener('click', closeDropdownOutside, { once: true });
+  }
+
+  function closeDropdownOutside(e) {
+    const wrap = document.getElementById('offerings-wrap');
+    if (!wrap.contains(e.target)) wrap.classList.remove('open');
+  }
+
+  // Intercept dropdown item clicks to close dropdown
+  document.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.getElementById('offerings-wrap').classList.remove('open');
+    });
+  });
+
+  // Mobile menu
+  function toggleMobile() {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  }
+
+  function closeMobile() {
+    document.getElementById('mobile-menu').classList.remove('open');
+  }
+
+  // Nav scroll
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('main-nav');
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // Fade-in on scroll (Intersection Observer)
+  function initFadeIns() {
+    const els = document.querySelectorAll('.page.active .fade-in:not(.visible)');
+    if (!els.length) return;
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    els.forEach(el => obs.observe(el));
+  }
+
+  // Marquee duplicate for seamless loop
+  (function() {
+    const track = document.getElementById('marquee');
+    if (track) {
+      const clone = track.innerHTML;
+      track.innerHTML = clone + clone;
+    }
+  })();
+
+  // Initial setup
+  document.addEventListener('DOMContentLoaded', () => {
+    initFadeIns();
+    // Trigger fade-ins already in view on load
+    setTimeout(() => {
+      document.querySelectorAll('.page.active .fade-in').forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {
+          setTimeout(() => el.classList.add('visible'), i * 60);
+        }
+      });
+    }, 50);
+  });
+</script>
+</body>
+</html>
